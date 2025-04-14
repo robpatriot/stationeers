@@ -1,0 +1,17 @@
+#working example for cooling:
+define TempMax 296.15 #23C
+define TempMin 283.15 #10C
+
+alias valve d0
+alias tempSensor d1
+
+alias currTemp r0
+alias tmp r1
+
+loop:
+l tmp valve On
+select tmp tmp minTemp maxTemp
+l currTemp tempSensor Temperature
+sgt tmp currTemp tmp
+s valve On tmp
+j loop

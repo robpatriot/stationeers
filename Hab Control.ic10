@@ -1,0 +1,99 @@
+define lightHash HASH("StructureWallLight")
+define sensorHash HASH("StructureOccupancySensor")
+define minTemp 289
+define maxTemp 296
+define minPress 9800
+
+alias tempSensor d0 # Temp Sensor
+alias valve d1 # Cooling Valve
+alias store1 d2 # First Suit Store
+alias store2 d3 # Second Suit Store
+
+alias currTemp r0
+alias occSensor r1
+alias occupied r2
+alias entranceOcc r3
+alias farmOcc r4
+alias workshopOcc r5
+alias kitchenOcc r6
+alias storeOcc r7
+alias suitTest r8
+alias currStore r9
+alias tmp r10
+
+move entranceOcc -1
+move farmOcc -1
+move workshopOcc -1
+move kitchenOcc -1
+move storeOcc -1
+
+start:
+yield
+
+alias currStore d2
+jal testSuit
+alias currStore d3
+jal testSuit
+
+lbn occSensor sensorHash HASH("Entrance") ReferenceId Maximum
+ld occupied occSensor Activate
+breq occupied entranceOcc 4
+move entranceOcc occupied
+sbn lightHash HASH("Entrance") On occupied
+
+lbn occSensor sensorHash HASH("Farm") ReferenceId Maximum
+ld occupied occSensor Activate
+breq occupied farmOcc 4
+move farmOcc occupied
+sbn lightHash HASH("Farm") On occupied
+
+lbn occSensor sensorHash HASH("Workshop") ReferenceId Maximum
+ld occupied occSensor Activate
+breq occupied workshopOcc 4
+move workshopOcc occupied
+sbn lightHash HASH("Workshop") On occupied
+
+lbn occSensor sensorHash HASH("Store") ReferenceId Maximum
+ld occupied occSensor Activate
+breq occupied storeOcc 4
+move storeOcc occupied
+sbn lightHash HASH("Store") On occupied
+
+lbn occSensor sensorHash HASH("Kitchen") ReferenceId Maximum
+ld occupied occSensor Activate
+breq occupied kitchenOcc 4
+move kitchenOcc occupied
+sbn lightHash HASH("Kitchen") On occupied
+
+l tmp valve On
+select tmp tmp minTemp maxTemp
+l currTemp tempSensor Temperature
+sgt tmp currTemp tmp
+s valve On tmp
+j start
+
+testSuit:
+ls suitTest currStore 1 Occupied
+beqz suitTest testBack
+ls suitTest currStore 1 ChargeRatio
+blt suitTest 0.99 turnStoreOn
+ls suitTest currStore 1 PressureWaste
+bnez suitTest turnStoreOn
+ls suitTest currStore 1 PressureAir
+blt suitTest minPress turnStoreOn
+
+testBack:
+ls suitTest currStore 2 Occupied
+beqz suitTest turnStoreOff
+ls suitTest currStore 2 Pressure
+s db Setting suitTest
+blt suitTest minPress turnStoreOn
+j turnStoreOff
+
+turnStoreOn:
+s currStore On 1
+j ra
+
+turnStoreOff:
+s currStore On 0
+j ra

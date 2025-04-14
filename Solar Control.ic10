@@ -1,0 +1,40 @@
+# define directions of sensor and panel power ports
+define SENSORDATAANGLE 270
+define PANELPOWERANGLE 270
+
+alias Sensor d0 # Daylight Sensor (up, not enclosed)
+alias PanelType d1 # Any controllable Solar Panel
+alias Display d2 # Optional, Kit (Console)
+
+alias AngleVertical r0
+alias AngleHorizontal r1
+alias CorrectionAngle r2
+alias PanelHash r3
+alias PanelOutput r5
+
+l PanelHash PanelType PrefabHash
+
+# set Display to Power-mode
+bdns Display start
+s Display Mode 2
+
+# calculate horizontal correction
+sub CorrectionAngle SENSORDATAANGLE PANELPOWERANGLE
+sub CorrectionAngle CorrectionAngle 90
+
+start:
+yield
+
+l AngleVertical Sensor Vertical
+sub AngleVertical 90 AngleVertical
+l AngleHorizontal Sensor Horizontal
+add AngleHorizontal AngleHorizontal CorrectionAngle
+
+sb PanelHash Vertical AngleVertical
+sb PanelHash Horizontal AngleHorizontal
+
+bdns Display start
+lb PanelOutput PanelHash Charge Sum
+s Display Setting PanelOutput
+
+j start

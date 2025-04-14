@@ -1,0 +1,63 @@
+define sleepTicks 5
+define minPressure 9800
+define maxTemp 297
+define minTankPressure 500
+define maxTankPressure 55000
+
+alias inletTank d0 # inlet tank
+alias valve d1 # cooling control
+alias coolAna d2 # cooling analyser
+alias coolPump d3 # cooling void pump
+
+alias gasPressure r0
+alias gasTemp r1
+alias sleepCount r2
+alias tank r3
+alias BPreg r4
+alias reg r5
+alias ana r6
+alias stackHead r7
+alias tmp r15
+
+move sleepCount sleepTicks
+
+start:
+yield
+l gasTemp inletTank Temperature
+sgt gasTemp gasTemp maxTemp # 1 if gas temp above max
+s valve On gasTemp
+
+l gasPressure coolAna Pressure
+snez gasPressure gasPressure # normalise to 1
+seqz tmp gasTemp # inlet is below max?
+and gasPressure gasPressure tmp # borrow var to check valve closed
+l tmp coolAna Temperature # use tmp to leave gasTemp as inlet value
+slt tmp tmp maxTemp # 1 if gas temp below max
+and tmp gasPressure tmp # gas exists AND temp below max
+s coolPump On tmp # pump on if cooled gas
+
+sub sleepCount sleepCount 1
+bgt sleepCount 0 start
+move sleepCount sleepTicks
+
+l gasPressure inletTank Pressure
+snez gasPressure gasPressure # normalise to 1
+seqz gasTemp gasTemp # invert to 1 if below max
+and tmp gasPressure gasTemp # gas exists AND temp below max
+sb HASH("StructureFiltration") On tmp # switch filtration on if needed
+
+move sp stackHead
+pressureTestLoop:
+beqz sp start # finished gas types
+pop ana
+pop reg
+pop BPreg
+pop tank
+ld gasPressure tank Pressure
+sgt tmp gasPressure maxTankPressure
+#sd BPreg On tmp
+blt gasPressure minTankPressure pressureTestLoop # below min pressure -> next gas
+ld gasPressure ana Pressure # pressure check canister pressure
+slt tmp gasPressure minPressure # if pressure below min
+sd reg On tmp # switch reg if needed
+j pressureTestLoop

@@ -1,0 +1,64 @@
+alias printer r0
+alias stacker r1
+alias sorter r2
+alias switch r3
+alias printerInstr r4
+alias vendSP r5
+alias prSPHead r6
+alias instr r7
+alias vending r9
+alias vendTicks r10
+alias wfm r11 # Wait for Mats
+alias temp r15
+
+s db Setting 0
+
+clr db
+push 0 # this printers wfm
+lbn stacker HASH("StructureStackerReverse") HASH("Autolathe Stacker") ReferenceId Maximum
+push stacker
+lb printer HASH("StructureAutolathe") ReferenceId Maximum
+push printer
+lbn sorter HASH("StructureLogicSorter") HASH("Autolathe Sorter") ReferenceId Maximum
+push sorter
+lbn switch HASH("StructureLogicSwitch2") HASH("Autolathe Switch") ReferenceId Maximum
+push switch
+push 0 # this printers wfm
+lbn stacker HASH("StructureStackerReverse") HASH("Pipe Stacker") ReferenceId Maximum
+push stacker
+lb printer HASH("StructureHydraulicPipeBender") ReferenceId Maximum
+push printer
+lbn sorter HASH("StructureLogicSorter") HASH("Pipe Sorter") ReferenceId Maximum
+push sorter
+lbn switch HASH("StructureLogicSwitch2") HASH("Pipe Switch") ReferenceId Maximum
+push switch
+push 0 # this printers wfm
+lbn stacker HASH("StructureStackerReverse") HASH("Elec Stacker") ReferenceId Maximum
+push stacker
+lb printer HASH("StructureElectronicsPrinter") ReferenceId Maximum
+push printer
+lbn sorter HASH("StructureLogicSorter") HASH("Elec Sorter") ReferenceId Maximum
+push sorter
+lbn switch HASH("StructureLogicSwitch2") HASH("Elec Switch") ReferenceId Maximum
+push switch
+push 0 # this printers wfm
+lbn stacker HASH("StructureStackerReverse") HASH("Tool Stacker") ReferenceId Maximum
+push stacker
+lb printer HASH("StructureToolManufactory") ReferenceId Maximum
+push printer
+lbn sorter HASH("StructureLogicSorter") HASH("Tool Sorter") ReferenceId Maximum
+push sorter
+lbn switch HASH("StructureLogicSwitch2") HASH("Tool Switch") ReferenceId Maximum
+push switch
+push 0 # this printers wfm
+lbn stacker HASH("StructureStackerReverse") HASH("Rocket Stacker") ReferenceId Maximum
+push stacker
+lb printer HASH("StructureRocketManufactory") ReferenceId Maximum
+push printer
+lbn sorter HASH("StructureLogicSorter") HASH("Rocket Sorter") ReferenceId Maximum
+push sorter
+lbn switch HASH("StructureLogicSwitch2") HASH("Rocket Switch") ReferenceId Maximum
+push switch
+move prSPHead sp
+
+s db Setting 1

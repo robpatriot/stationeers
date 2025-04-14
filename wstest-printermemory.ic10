@@ -1,0 +1,33 @@
+alias printer r0
+alias switch r1
+alias temp r15
+
+lb printer HASH("StructureAutolathe") ReferenceId Maximum
+lbn switch HASH("StructureLogicSwitch2") HASH("Autolathe Switch") ReferenceId Maximum
+
+start:
+yield
+
+printerLoop:
+ld temp switch Open # Get switch state
+bnez temp switchPressed
+getd temp printer 1 # get printer first mats request register 
+#sra temp temp 8
+#and temp temp 255
+s db Setting temp
+#sleep 1
+j start
+
+switchPressed:
+sd switch Open 0 # Reset switch
+ld temp printer Lock
+bnez temp reset
+sd printer Lock 1
+putd printer 0 PrinterInstruction.WaitUntilNextValid
+putd printer 1 67191089727490
+j printerLoop
+
+reset:
+clrd printer # Clear all printer instr
+sd printer Lock 0 # As finished unlock printer for manual use
+j start # Start again

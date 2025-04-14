@@ -1,0 +1,40 @@
+define lightHash HASH("StructureWallLight")
+define crusherHash HASH("StructureIceCrusher")
+
+alias sensor d0 # occup sensor
+alias dial d1 # crusher temp
+alias screen d2 # screen for temp
+alias inletTank d3 # input tank
+
+alias prevOcc r0
+alias occupied r1
+alias gasPressure r2
+alias crusherTemp r4
+alias tmp r15
+
+start:
+yield
+l occupied sensor Activate # anyone here?
+beq occupied prevOcc afterOccup # check if already know
+move prevOcc occupied
+sb lightHash On occupied # switch lights
+s screen On occupied # switch screen
+
+afterOccup:
+l crusherTemp dial Setting
+sb crusherHash Setting crusherTemp
+s screen Setting crusherTemp
+
+lbs tmp crusherHash 0 Occupied Maximum # any crusher has ice?
+beqz tmp checkCrusher # No ice -> check crushers
+sb crusherHash On 1
+j start
+
+checkCrusher:
+l gasPressure inletTank Pressure
+seqz gasPressure gasPressure # normalise to 1 if no pressure
+lb tmp crusherHash On Minimum # all crushers on?
+and tmp tmp gasPressure # crushers on AND no gas
+beqz tmp start # crushers off or gasExists
+sb crusherHash On 0 # crushers off as no gas
+j start

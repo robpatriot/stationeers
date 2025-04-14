@@ -1,0 +1,67 @@
+define batteryHash HASH("StructureBatteryLarge")
+define genHash HASH("StructureSolidFuelGenerator")
+define coalHash HASH("ItemCoalOre")
+
+define minCharge 10
+define maxCharge 80
+define minTemp 293
+define maxTemp 297
+
+alias tempSensor d0
+alias valve d1
+alias vendor d2
+alias warningLight d3
+
+alias charge r0
+alias max r1
+alias currTemp r2
+alias fueled r3
+alias vending r4
+alias tmp r15
+
+move vending 0
+
+start:
+yield
+lb charge batteryHash Charge Average
+lb max batteryHash Maximum Maximum
+div charge charge max
+mul charge charge 100 # battery charge %
+
+blt charge maxCharge checkMinCharge # below max? -> check min
+sb genHash On 0
+j checkFuel
+
+checkMinCharge:
+bgt charge minCharge checkFuel # above min charge? -> next section
+sb genHash On 1
+
+checkFuel:
+l tmp vendor Quantity # how much fuel left in vendor
+seqz tmp tmp
+s warningLight On tmp # turn light on if no fuel, off if fuel
+
+lbs fueled genHash 0 Occupied Minimum # fuel in input?
+bnez vending vendedCheck # if vending -> finished vending?
+bnez fueled coolerControl # if fueled -> next section
+move vending 1
+s vendor On 1
+s vendor RequestHash coalHash
+j coolerControl
+
+vendedCheck:
+beqz fueled coolerControl # no fuel, wait for vend to complete
+s vendor On 0
+move vending 0
+
+coolerControl:
+l currTemp tempSensor Temperature
+s db Setting currTemp
+blt currTemp maxTemp checkMinTemp
+s valve On 1
+j start
+
+checkMinTemp:
+bgt currTemp minTemp start
+s valve On 0
+j start

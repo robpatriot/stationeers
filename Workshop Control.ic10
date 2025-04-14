@@ -1,0 +1,108 @@
+define maxVendTicks 6
+alias rmapPrinter d0
+alias vendor d1
+alias printer r0
+alias stacker r1
+alias sorter r2
+alias switch r3
+alias printerInstr r4
+alias vendSP r5
+alias prSPHead r6
+alias instr r7
+alias vending r9
+alias vendTicks r10
+alias wfm r11 # Wait for Mats
+alias temp r15
+move vendSP prSPHead
+move vending 0
+start:
+yield
+s db Setting vending
+move sp prSPHead # Reset pr stack
+beqz vending checkRequests # not vending -> check requests
+add vendTicks vendTicks 1
+l temp vendor ExportCount # have exported?
+bnez temp vendFinished # finished vend -> clear and check next
+blt vendTicks maxVendTicks printerLoop # still vending -> printers
+get temp db vendSP
+and temp temp 255 # get wfm sp pos
+put db temp -1 # set timeout for printer wfm
+vendFinished:
+move vending 0
+move vendTicks 0
+s vendor ClearMemory 1
+yield # wait for memory to clear
+checkRequests:
+beq prSPHead vendSP printerLoop # not vending, no requests -> printers
+move vending 1
+sub vendSP vendSP 1
+get temp db vendSP # get next request from stack
+sra temp temp 8
+s vendor RequestHash temp
+printerLoop:
+beqz sp start # finished -> restart
+pop switch
+pop sorter
+pop printer
+pop stacker
+pop wfm # MUST come off last
+getd printerInstr printer 1 # Get instr executerecipe
+ld temp switch Open # switch?
+beqz temp switchOpen
+sd switch Open 0 # Reset
+bnez printerInstr resetPrinter # if instr -> reset printer
+sd printer Lock 1 # Lock printer
+sd stacker On 1 # stacker on
+ld temp printer RecipeHash # Get curr recipe
+sll instr temp 16 # shift
+ld temp stacker Setting # stackers quantity setting
+sll temp temp 8 # shift
+or instr instr temp # combine recipe and quantity
+or instr instr PrinterInstruction.ExecuteRecipe # execute opcode
+putd printer 0 PrinterInstruction.WaitUntilNextValid # wait for mats
+putd printer 1 instr # Put execute instr
+j printerLoop # next printer
+switchOpen:
+ld temp printer Lock
+beqz temp checkStacker # Not locked -> turn off stacker when empty
+beqz printerInstr pauseAndResetP # locked, no instr -> finished, clear printer
+ld temp printer Activate
+bnez temp printerLoop # lock, instr, printer active -> printing, next printer
+getd instr printer 54 # lock, instr, not active check mats
+beqz instr printerLoop # ERR no mats request?! -> next printer
+bnez wfm checkArrived #  wfm -> check if arrived
+put db sp 1 # wfm assumed to be @sp
+sra instr instr 16 # just reagent hash
+rmap instr rmapPrinter instr # map to items
+sll instr instr 8
+or temp instr sp # store sp pos in request
+put db vendSP temp # store vend req
+add vendSP vendSP 1 # incr vendSP
+or instr instr SorterInstruction.FilterPrefabHashEquals # sorter instr
+putd sorter 0 262 # limit once instr
+putd sorter 1 instr
+j printerLoop
+checkArrived:
+beq wfm -1 resetPrinter # req failed -> reset printer
+ld temp printer ImportCount
+beqz temp printerLoop # nothing imported yet -> next printer
+clrd sorter # clear the sorter instrs
+sd printer ClearMemory 1 # reset import count
+put db sp 0 # clear printers wfm
+yield # time for printer to register new mats
+j printerLoop # finished vending -> next printer
+pauseAndResetP:
+sleep 1 # Wait after print for stacker to receive
+resetPrinter:
+clrd sorter # clear sorter instrs
+clrd printer # clear printer instrs
+sd printer ClearMemory 1 # clear import/export count
+sd printer Activate 0 # printer off
+sd printer Lock 0 # finished -> unlock printer
+put db sp 0 # clear printers wfm
+j printerLoop # next printer
+checkStacker:
+ld temp stacker Activate # 1 if empty, 0 if contents
+seqz temp temp # 1 if contents
+sd stacker On temp # Turn stacker on if contents else off
+j printerLoop

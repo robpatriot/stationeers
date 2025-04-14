@@ -1,0 +1,73 @@
+define tankHash HASH("StructureTankSmall")
+define regHash HASH("StructurePressureRegulator")
+define BPregHash HASH("StructureBackPressureRegulator")
+define anaHash HASH("StructurePipeAnalysizer")
+
+define minPressure 9800
+define maxTankPressure 55000
+
+alias gasPressure r0
+alias gasTemp r1
+alias sleepCount r2
+alias tank r3
+alias BPreg r4
+alias reg r5
+alias ana r6
+alias stackHead r7
+alias tmp r15
+
+s db Setting 0
+
+clr db
+lbn tank tankHash HASH("co2 Tank") ReferenceId Maximum
+push tank
+lbn BPreg BPregHash HASH("co2 BPregulator") ReferenceId Maximum
+sd BPreg Setting maxTankPressure
+push BPreg
+lbn reg regHash HASH("co2 Regulator") ReferenceId Maximum
+sd reg Setting minPressure
+push reg
+lbn ana anaHash HASH("co2 Analyser") ReferenceId Maximum
+push ana
+lbn tank tankHash HASH("n2 Tank") ReferenceId Maximum
+push tank
+lbn BPreg BPregHash HASH("n2 BPregulator") ReferenceId Maximum
+sd BPreg Setting maxTankPressure
+push BPreg
+lbn reg regHash HASH("n2 Regulator") ReferenceId Maximum
+sd reg Setting minPressure
+push reg
+lbn ana anaHash HASH("n2 Analyser") ReferenceId Maximum
+push ana
+lbn tank tankHash HASH("Vol Tank") ReferenceId Maximum
+push tank
+lbn BPreg BPregHash HASH("Vol BPregulator") ReferenceId Maximum
+sd BPreg Setting maxTankPressure
+push BPreg
+lbn reg regHash HASH("Vol Regulator") ReferenceId Maximum
+sd reg Setting minPressure
+push reg
+lbn ana anaHash HASH("Vol Analyser") ReferenceId Maximum
+push ana
+lbn tank tankHash HASH("o2 Tank") ReferenceId Maximum
+push tank
+lbn BPreg BPregHash HASH("o2 BPregulator") ReferenceId Maximum
+sd BPreg Setting maxTankPressure
+push BPreg
+lbn reg regHash HASH("o2 Regulator") ReferenceId Maximum
+sd reg Setting minPressure
+push reg
+lbn ana anaHash HASH("o2 Analyser") ReferenceId Maximum
+push ana
+lbn tank tankHash HASH("Fuel Tank") ReferenceId Maximum
+push tank
+lbn BPreg BPregHash HASH("Fuel BPregulator") ReferenceId Maximum
+sd BPreg Setting maxTankPressure
+push BPreg
+lbn reg regHash HASH("Fuel Regulator") ReferenceId Maximum
+sd reg Setting minPressure
+push reg
+lbn ana anaHash HASH("Fuel Analyser") ReferenceId Maximum
+push ana
+move stackHead sp
+s db Setting 1
