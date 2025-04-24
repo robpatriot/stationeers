@@ -3,7 +3,7 @@ define regHash HASH("StructurePressureRegulator")
 define BPregHash HASH("StructureBackPressureRegulator")
 define anaHash HASH("StructurePipeAnalysizer")
 
-define minPressure 9800
+define minPressure 19800
 define maxTankPressure 55000
 
 alias gasPressure r0
@@ -17,7 +17,6 @@ alias stackHead r7
 alias tmp r15
 
 s db Setting 0
-
 clr db
 lbn tank tankHash HASH("co2 Tank") ReferenceId Maximum
 push tank
