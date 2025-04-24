@@ -6,70 +6,86 @@ define minPress 9800
 
 alias tempSensor d0 # Temp Sensor
 alias valve d1 # Cooling Valve
-alias store1 d2 # First Suit Store
-alias store2 d3 # Second Suit Store
 
 alias currTemp r0
-alias occSensor r1
+alias sensor r1
 alias occupied r2
 alias entranceOcc r3
 alias farmOcc r4
-alias workshopOcc r5
-alias kitchenOcc r6
-alias storeOcc r7
-alias suitTest r8
-alias currStore r9
-alias tmp r10
-
-move entranceOcc -1
-move farmOcc -1
-move workshopOcc -1
-move kitchenOcc -1
-move storeOcc -1
+alias corr1Occ r5
+alias corr2Occ r6
+alias battOcc r7
+alias kitchenOcc r8
+alias storeOcc r9
+alias workshopOcc r10
+alias suitTest r11
+alias tmp r15
 
 start:
 yield
-
 alias currStore d2
 jal testSuit
 alias currStore d3
 jal testSuit
 
-lbn occSensor sensorHash HASH("Entrance") ReferenceId Maximum
-ld occupied occSensor Activate
+lbn sensor sensorHash HASH("Entrance") ReferenceId Maximum
+ld occupied sensor Activate
 breq occupied entranceOcc 4
 move entranceOcc occupied
 sbn lightHash HASH("Entrance") On occupied
 
-lbn occSensor sensorHash HASH("Farm") ReferenceId Maximum
-ld occupied occSensor Activate
+lbn sensor sensorHash HASH("Farm") ReferenceId Maximum
+ld occupied sensor Activate
 breq occupied farmOcc 4
 move farmOcc occupied
 sbn lightHash HASH("Farm") On occupied
 
-lbn occSensor sensorHash HASH("Workshop") ReferenceId Maximum
-ld occupied occSensor Activate
-breq occupied workshopOcc 4
-move workshopOcc occupied
-sbn lightHash HASH("Workshop") On occupied
-
-lbn occSensor sensorHash HASH("Store") ReferenceId Maximum
-ld occupied occSensor Activate
+lbn sensor sensorHash HASH("Store") ReferenceId Maximum
+ld occupied sensor Activate
 breq occupied storeOcc 4
 move storeOcc occupied
 sbn lightHash HASH("Store") On occupied
 
-lbn occSensor sensorHash HASH("Kitchen") ReferenceId Maximum
-ld occupied occSensor Activate
+lbn sensor sensorHash HASH("Kitchen") ReferenceId Maximum
+ld occupied sensor Activate
 breq occupied kitchenOcc 4
 move kitchenOcc occupied
 sbn lightHash HASH("Kitchen") On occupied
+
+lbn sensor sensorHash HASH("Corridor 1") ReferenceId Maximum
+ld occupied sensor Activate
+breq occupied corr1Occ 4
+move corr1Occ occupied
+sbn lightHash HASH("Corridor 1") On occupied
+
+lbn sensor sensorHash HASH("Corridor 2") ReferenceId Maximum
+ld occupied sensor Activate
+breq occupied corr2Occ 4
+move corr2Occ occupied
+sbn lightHash HASH("Corridor 2") On occupied
+
+lbn sensor sensorHash HASH("Battery") ReferenceId Maximum
+ld occupied sensor Activate
+breq occupied battOcc 4
+move battOcc occupied
+sbn lightHash HASH("Battery") On occupied
+
+lbn sensor sensorHash HASH("Workshop") ReferenceId Maximum
+ld occupied sensor Activate
+breq occupied workshopOcc 4
+move workshopOcc occupied
+sbn lightHash HASH("Workshop") On occupied
 
 l tmp valve On
 select tmp tmp minTemp maxTemp
 l currTemp tempSensor Temperature
 sgt tmp currTemp tmp
 s valve On tmp
+
+lb sensor HASH("StructureDaylightSensor") ReferenceId Maximum
+ld tmp sensor Activate
+sb HASH("StructureGrowLight") On tmp
+
 j start
 
 testSuit:
