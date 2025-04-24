@@ -1,13 +1,17 @@
 define sleepTicks 5
-define minPressure 9800
+define minCanPressure 19800
 define maxTemp 297
 define minTankPressure 500
 define maxTankPressure 55000
+define minWastePressure 0
+define maxWastePressure 10000
 
 alias inletTank d0 # inlet tank
 alias valve d1 # cooling control
 alias coolAna d2 # cooling analyser
 alias coolPump d3 # cooling void pump
+alias vent d4 # Filtration clear vent
+alias wasteAna d5 # Waste analyser
 
 alias gasPressure r0
 alias gasTemp r1
@@ -46,6 +50,12 @@ seqz gasTemp gasTemp # invert to 1 if below max
 and tmp gasPressure gasTemp # gas exists AND temp below max
 sb HASH("StructureFiltration") On tmp # switch filtration on if needed
 
+l tmp vent On
+select tmp tmp minWastePressure maxWastePressure
+l gasPressure wasteAna Pressure
+sgt tmp gasPressure tmp
+s vent On tmp
+
 move sp stackHead
 pressureTestLoop:
 beqz sp start # finished gas types
@@ -55,9 +65,10 @@ pop BPreg
 pop tank
 ld gasPressure tank Pressure
 sgt tmp gasPressure maxTankPressure
-#sd BPreg On tmp
-blt gasPressure minTankPressure pressureTestLoop # below min pressure -> next gas
+sd BPreg On tmp
+sgt tmp gasPressure minTankPressure # above min tank pres
 ld gasPressure ana Pressure # pressure check canister pressure
-slt tmp gasPressure minPressure # if pressure below min
+slt gasPressure gasPressure minCanPressure # if pressure below min
+and tmp tmp gasPressure
 sd reg On tmp # switch reg if needed
 j pressureTestLoop
