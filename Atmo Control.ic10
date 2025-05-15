@@ -1,5 +1,6 @@
 define sleepTicks 5
-define minCanPressure 19800
+define minCanPressure 19700
+define maxCanPressure 19900
 define maxTemp 297
 define minTankPressure 500
 define maxTankPressure 55000
@@ -21,6 +22,7 @@ alias BPreg r4
 alias reg r5
 alias ana r6
 alias stackHead r7
+alias tankPressure r8
 alias tmp r15
 
 move sleepCount sleepTicks
@@ -66,9 +68,11 @@ pop tank
 ld gasPressure tank Pressure
 sgt tmp gasPressure maxTankPressure
 sd BPreg On tmp
-sgt tmp gasPressure minTankPressure # above min tank pres
+ld tmp reg On
+select tmp tmp maxCanPressure minCanPressure
 ld gasPressure ana Pressure # pressure check canister pressure
-slt gasPressure gasPressure minCanPressure # if pressure below min
-and tmp tmp gasPressure
+slt tmp gasPressure tmp # tmp = 1 if schmitt needs
+sgt tankPressure gasPressure minTankPressure # above min tank pres
+and tmp tmp tankPressure
 sd reg On tmp # switch reg if needed
 j pressureTestLoop
