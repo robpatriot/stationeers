@@ -5,7 +5,7 @@ define maxTemp 297
 define minTankPressure 500
 define maxTankPressure 55000
 define minWastePressure 0
-define maxWastePressure 10000
+define maxWastePressure 500
 
 alias inletTank d0 # inlet tank
 alias valve d1 # cooling control
