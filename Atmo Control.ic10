@@ -6,6 +6,8 @@ define minTankPressure 500
 define maxTankPressure 55000
 define minWastePressure 0
 define maxWastePressure 500
+define minFuelPressure 4000
+define maxFuelPressure 8000
 
 alias inletTank d0 # inlet tank
 alias valve d1 # cooling control
@@ -23,9 +25,17 @@ alias reg r5
 alias ana r6
 alias stackHead r7
 alias tankPressure r8
+alias fuelTank r9
+alias oxyTank r10
+alias volTank r11
+alias mixer r12
 alias tmp r15
 
 move sleepCount sleepTicks
+lbn fuelTank HASH("StructureTankSmall") HASH("Fuel Tank") ReferenceId Maximum
+lbn oxyTank HASH("StructureTankSmall") HASH("o2 Tank") ReferenceId Maximum
+lbn volTank HASH("StructureTankSmall") HASH("Vol Tank") ReferenceId Maximum
+lbn mixer HASH("StructureGasMixer") HASH("Fuel Mixer") ReferenceId Maximum
 
 start:
 yield
@@ -45,6 +55,27 @@ s coolPump On tmp # pump on if cooled gas
 sub sleepCount sleepCount 1
 bgt sleepCount 0 start
 move sleepCount sleepTicks
+
+ld gasTemp volTank Temperature
+mul tmp gasTemp 2 # (2*T.v)
+ld gasTemp oxyTank Temperature
+div tmp tmp gasTemp # ((2*T.v)/T.o)
+add tmp 1 tmp # (1+((2*T.v)/T.o))
+div tmp 100 tmp # 100/(1+((2*T.v)/T.o))
+sb mixer Setting tmp
+
+ld tmp mixer On
+select tmp tmp maxFuelPressure minFuelPressure
+ld gasPressure fuelTank Pressure
+slt tmp gasPressure tmp # need fuel?
+
+ld gasPressure oxyTank Pressure
+sgt gasPressure gasPressure minTankPressure
+and tmp tmp gasPressure # fuel? + >min o2
+ld gasPressure volTank Pressure
+sgt gasPressure gasPressure minTankPressure 
+and tmp tmp gasPressure # fuel? + >min o2 and vols
+sd mixer On tmp
 
 l gasPressure inletTank Pressure
 snez gasPressure gasPressure # normalise to 1
