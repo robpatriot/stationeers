@@ -1,19 +1,29 @@
 define lightHash HASH("StructureWallLight")
 define crusherHash HASH("StructureIceCrusher")
 
+define minAirPressure 103
+
 alias sensor d0 # occup sensor
 alias dial d1 # crusher temp
 alias screen d2 # screen for temp
 alias inletTank d3 # input tank
+alias gasSensor d4 # air sensor
 
 alias prevOcc r0
 alias occupied r1
 alias gasPressure r2
 alias crusherTemp r4
+alias oxyVent r5
 alias tmp r15
+
+lbn oxyVent HASH("StructureActiveVent") HASH("Oxygen Vent") ReferenceId Maximum
 
 start:
 yield
+l gasPressure gasSensor Pressure
+slt tmp gasPressure minAirPressure
+sd oxyVent On tmp
+
 l occupied sensor Activate # anyone here?
 beq occupied prevOcc afterOccup # check if already know
 move prevOcc occupied
