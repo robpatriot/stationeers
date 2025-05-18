@@ -2,7 +2,7 @@ define lightHash HASH("StructureWallLight")
 define sensorHash HASH("StructureOccupancySensor")
 define minTemp 289
 define maxTemp 296
-define minPress 9800
+define minPress 19000
 
 alias tempSensor d0 # Temp Sensor
 alias valve d1 # Cooling Valve
