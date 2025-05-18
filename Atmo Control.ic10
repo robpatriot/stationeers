@@ -1,6 +1,6 @@
 define sleepTicks 5
-define minCanPressure 19700
-define maxCanPressure 19900
+define minCanPressure 19050
+define maxCanPressure 19500
 define maxTemp 297
 define minTankPressure 500
 define maxTankPressure 55000
@@ -37,6 +37,7 @@ lbn oxyTank HASH("StructureTankSmall") HASH("o2 Tank") ReferenceId Maximum
 lbn volTank HASH("StructureTankSmall") HASH("Vol Tank") ReferenceId Maximum
 lbn mixer HASH("StructureGasMixer") HASH("Fuel Mixer") ReferenceId Maximum
 
+s db Setting 0
 start:
 yield
 l gasTemp inletTank Temperature
@@ -73,7 +74,7 @@ ld gasPressure oxyTank Pressure
 sgt gasPressure gasPressure minTankPressure
 and tmp tmp gasPressure # fuel? + >min o2
 ld gasPressure volTank Pressure
-sgt gasPressure gasPressure minTankPressure 
+sgt gasPressure gasPressure minTankPressure
 and tmp tmp gasPressure # fuel? + >min o2 and vols
 sd mixer On tmp
 
@@ -96,14 +97,14 @@ pop ana
 pop reg
 pop BPreg
 pop tank
-ld gasPressure tank Pressure
-sgt tmp gasPressure maxTankPressure
+ld tankPressure tank Pressure
+sgt tmp tankPressure maxTankPressure
 sd BPreg On tmp
 ld tmp reg On
 select tmp tmp maxCanPressure minCanPressure
 ld gasPressure ana Pressure # pressure check canister pressure
 slt tmp gasPressure tmp # tmp = 1 if schmitt needs
-sgt tankPressure gasPressure minTankPressure # above min tank pres
+sgt tankPressure tankPressure minTankPressure # above min tank pres
 and tmp tmp tankPressure
 sd reg On tmp # switch reg if needed
 j pressureTestLoop
