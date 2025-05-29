@@ -4,8 +4,6 @@ define maxCanPressure 19500
 define maxTemp 297
 define minTankPressure 500
 define maxTankPressure 55000
-define minWastePressure 0
-define maxWastePressure 500
 define minFuelPressure 4000
 define maxFuelPressure 8000
 
@@ -13,8 +11,7 @@ alias inletTank d0 # inlet tank
 alias valve d1 # cooling control
 alias coolAna d2 # cooling analyser
 alias coolPump d3 # cooling void pump
-alias vent d4 # Filtration clear vent
-alias wasteAna d5 # Waste analyser
+alias mixer d4 # fuel mixer
 
 alias gasPressure r0
 alias gasTemp r1
@@ -23,26 +20,20 @@ alias tank r3
 alias BPreg r4
 alias reg r5
 alias ana r6
-alias stackHead r7
-alias tankPressure r8
-alias fuelTank r9
-alias oxyTank r10
-alias volTank r11
-alias mixer r12
-alias tmp r15
+alias tankPressure r7
+alias fuelTank r8
+alias oxyTank r9
+alias volTank r10
+alias tmp r14
+alias stackHead r15
 
 move sleepCount sleepTicks
-lbn fuelTank HASH("StructureTankSmall") HASH("Fuel Tank") ReferenceId Maximum
-lbn oxyTank HASH("StructureTankSmall") HASH("o2 Tank") ReferenceId Maximum
-lbn volTank HASH("StructureTankSmall") HASH("Vol Tank") ReferenceId Maximum
-lbn mixer HASH("StructureGasMixer") HASH("Fuel Mixer") ReferenceId Maximum
 
-s db Setting 0
 start:
 yield
 l gasTemp inletTank Temperature
 sgt gasTemp gasTemp maxTemp # 1 if gas temp above max
-s valve On gasTemp
+s valve On gasTemp # open cool valve
 
 l gasPressure coolAna Pressure
 snez gasPressure gasPressure # normalise to 1
@@ -54,29 +45,8 @@ and tmp gasPressure tmp # gas exists AND temp below max
 s coolPump On tmp # pump on if cooled gas
 
 sub sleepCount sleepCount 1
-bgt sleepCount 0 start
+bgt sleepCount 0 start # run every X ticks
 move sleepCount sleepTicks
-
-ld gasTemp volTank Temperature
-mul tmp gasTemp 2 # (2*T.v)
-ld gasTemp oxyTank Temperature
-div tmp tmp gasTemp # ((2*T.v)/T.o)
-add tmp 1 tmp # (1+((2*T.v)/T.o))
-div tmp 100 tmp # 100/(1+((2*T.v)/T.o))
-sb mixer Setting tmp
-
-ld tmp mixer On
-select tmp tmp maxFuelPressure minFuelPressure
-ld gasPressure fuelTank Pressure
-slt tmp gasPressure tmp # need fuel?
-
-ld gasPressure oxyTank Pressure
-sgt gasPressure gasPressure minTankPressure
-and tmp tmp gasPressure # fuel? + >min o2
-ld gasPressure volTank Pressure
-sgt gasPressure gasPressure minTankPressure
-and tmp tmp gasPressure # fuel? + >min o2 and vols
-sd mixer On tmp
 
 l gasPressure inletTank Pressure
 snez gasPressure gasPressure # normalise to 1
@@ -84,12 +54,27 @@ seqz gasTemp gasTemp # invert to 1 if below max
 and tmp gasPressure gasTemp # gas exists AND temp below max
 sb HASH("StructureFiltration") On tmp # switch filtration on if needed
 
-l tmp vent On
-select tmp tmp minWastePressure maxWastePressure
-l gasPressure wasteAna Pressure
-sgt tmp gasPressure tmp
-s vent On tmp
+ld gasTemp volTank Temperature
+mul tmp gasTemp 2 # (2*T.v)
+ld gasTemp oxyTank Temperature
+div tmp tmp gasTemp # ((2*T.v)/T.o)
+add tmp 1 tmp # (1+((2*T.v)/T.o))
+div tmp 100 tmp # 100/(1+((2*T.v)/T.o))
+s mixer Setting tmp
 
+l tmp mixer On
+select tmp tmp maxFuelPressure minFuelPressure
+ld gasPressure fuelTank Pressure
+slt tmp gasPressure tmp # need fuel?
+ld gasPressure oxyTank Pressure
+sgt gasPressure gasPressure minTankPressure
+and tmp tmp gasPressure # fuel? + >min o2
+ld gasPressure volTank Pressure
+sgt gasPressure gasPressure minTankPressure
+and tmp tmp gasPressure # fuel? + >min o2 and vols
+s mixer On tmp
+
+j start # DELETE THIS
 move sp stackHead
 pressureTestLoop:
 beqz sp start # finished gas types
