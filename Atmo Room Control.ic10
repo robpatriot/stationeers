@@ -21,7 +21,7 @@ lbn oxyVent HASH("StructureActiveVent") HASH("Oxygen Vent") ReferenceId Maximum
 start:
 yield
 l gasPressure gasSensor Pressure
-slt tmp gasPressure minAirPressure
+slt tmp gasPressure minAirPressure # enough air?
 sd oxyVent On tmp
 
 l occupied sensor Activate # anyone here?
