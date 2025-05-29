@@ -83,7 +83,8 @@ sgt tmp currTemp tmp
 s valve On tmp
 
 lb sensor HASH("StructureDaylightSensor") ReferenceId Maximum
-ld tmp sensor Activate
+ld tmp sensor Vertical
+slt tmp tmp 100
 sb HASH("StructureGrowLight") On tmp
 
 j start
