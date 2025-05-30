@@ -1,6 +1,6 @@
-define minCanPressure 19050
-define maxCanPressure 19500
-define minTankPressure 500
+define minCanPressure 18050
+define maxCanPressure 18500
+define minTankPressure 2000
 
 alias gasPressure r0
 alias tankPressure r1
@@ -21,13 +21,16 @@ beq sp gasesHead suitLoopFinish # finished gas types
 pop tank
 pop pump
 pop ana
+ld tankPressure tank Pressure
+div tmp 73500 tankPressure # 30 mols * 295 C * 8 / pressure
+sd pump Setting tmp
+sgt tankPressure tankPressure minTankPressure # above min tank pres
 ld tmp pump On
 select tmp tmp maxCanPressure minCanPressure
 ld gasPressure ana Pressure # pressure check canister pressure
 slt tmp gasPressure tmp # tmp = 1 if schmitt needs
-sgt tankPressure tankPressure minTankPressure # above min tank pres
-and tmp tmp tankPressure
-sd pump On tmp # switch pump if needed
+and tmp tmp tankPressure # < min pressure and tank > min pressure
+#sd pump On tmp # switch pump if needed
 j suitPressureLoop
 suitLoopFinish:
 j start

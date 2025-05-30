@@ -1,0 +1,64 @@
+define tankHash HASH("StructureTankSmall")
+define pumpHash HASH("StructureTurboVolumePump")
+define anaHash HASH("StructurePipeAnalysizer")
+
+alias gasPressure r0
+alias tankPressure r1
+alias tank r2
+alias pump r3
+alias ana r4
+alias oxyTank r5
+alias n2Tank r6
+alias tmp r13
+alias gasesHead r14
+alias suitsHead r15
+
+s db Setting 0
+clr db
+lbn tank tankHash HASH("co2 Tank") ReferenceId Maximum
+push tank
+lbn pump pumpHash HASH("co2 Pump") ReferenceId Maximum
+push pump
+lbn ana anaHash HASH("co2 Analyser") ReferenceId Maximum
+push ana
+lbn tank tankHash HASH("n2 Tank") ReferenceId Maximum
+move n2Tank tank
+push tank
+lbn pump pumpHash HASH("n2 Pump") ReferenceId Maximum
+push pump
+lbn ana anaHash HASH("n2 Analyser") ReferenceId Maximum
+push ana
+lbn tank tankHash HASH("Vol Tank") ReferenceId Maximum
+push tank
+lbn pump pumpHash HASH("Vol Pump") ReferenceId Maximum
+push pump
+lbn ana anaHash HASH("Vol Analyser") ReferenceId Maximum
+push ana
+lbn tank tankHash HASH("o2 Tank") ReferenceId Maximum
+move oxyTank tank
+push tank
+lbn pump pumpHash HASH("o2 Pump") ReferenceId Maximum
+push pump
+lbn ana anaHash HASH("o2 Analyser") ReferenceId Maximum
+push ana
+lbn tank tankHash HASH("Fuel Tank") ReferenceId Maximum
+push tank
+lbn pump pumpHash HASH("Fuel Pump") ReferenceId Maximum
+push pump
+lbn ana anaHash HASH("Fuel Analyser") ReferenceId Maximum
+push ana
+move gasesHead sp
+lbn ana anaHash HASH("Suit n2 Analyser") ReferenceId Maximum
+push ana
+lbn pump pumpHash HASH("Suit n2 Pump") ReferenceId Maximum
+push pump
+move tank n2Tank
+push tank
+lbn ana anaHash HASH("Suit o2 Analyser") ReferenceId Maximum
+push ana
+lbn pump pumpHash HASH("Suit o2 Pump") ReferenceId Maximum
+push pump
+move tank oxyTank
+push tank
+move suitsHead sp
+s db Setting 1
