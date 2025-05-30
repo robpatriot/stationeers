@@ -1,14 +1,14 @@
 define sleepTicks 5
-define minCanPressure 19050
-define maxCanPressure 19500
+define minCanPressure 18050
+define maxCanPressure 18500
 define maxTemp 297
 define minTankPressure 500
-define maxTankPressure 55000
+define maxTankPressure 50000
 define minFuelPressure 4000
 define maxFuelPressure 8000
 
 alias inletTank d0 # inlet tank
-alias valve d1 # cooling control
+alias coolValve d1 # cooling control
 alias coolAna d2 # cooling analyser
 alias coolPump d3 # cooling void pump
 alias mixer d4 # fuel mixer
@@ -17,8 +17,8 @@ alias gasPressure r0
 alias gasTemp r1
 alias sleepCount r2
 alias tank r3
-alias BPreg r4
-alias reg r5
+alias valve r4
+alias pump r5
 alias ana r6
 alias tankPressure r7
 alias fuelTank r8
@@ -26,15 +26,13 @@ alias oxyTank r9
 alias volTank r10
 alias tmp r14
 alias stackHead r15
-
 move sleepCount sleepTicks
 
 start:
 yield
 l gasTemp inletTank Temperature
 sgt gasTemp gasTemp maxTemp # 1 if gas temp above max
-s valve On gasTemp # open cool valve
-
+s coolValve On gasTemp # open cool valve
 l gasPressure coolAna Pressure
 snez gasPressure gasPressure # normalise to 1
 seqz tmp gasTemp # inlet is below max?
@@ -74,22 +72,21 @@ sgt gasPressure gasPressure minTankPressure
 and tmp tmp gasPressure # fuel? + >min o2 and vols
 s mixer On tmp
 
-j start # DELETE THIS
 move sp stackHead
 pressureTestLoop:
 beqz sp start # finished gas types
 pop ana
-pop reg
-pop BPreg
+pop pump
+pop valve
 pop tank
 ld tankPressure tank Pressure
 sgt tmp tankPressure maxTankPressure
-sd BPreg On tmp
-ld tmp reg On
+sd valve On tmp
+ld tmp pump On
 select tmp tmp maxCanPressure minCanPressure
 ld gasPressure ana Pressure # pressure check canister pressure
 slt tmp gasPressure tmp # tmp = 1 if schmitt needs
 sgt tankPressure tankPressure minTankPressure # above min tank pres
 and tmp tmp tankPressure
-sd reg On tmp # switch reg if needed
+sd pump On tmp # switch reg if needed
 j pressureTestLoop
