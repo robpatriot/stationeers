@@ -2,25 +2,33 @@ define minCanPressure 18050
 define maxCanPressure 18500
 define minTankPressure 2000
 
+alias canAna d0
+alias gasDial d1
+alias gasCons d2
+alias gasButton d3
+
 alias gasPressure r0
 alias tankPressure r1
 alias tank r2
 alias pump r3
 alias ana r4
-alias oxyTank r5
-alias n2Tank r6
 alias tmp r13
 alias gasesHead r14
 alias suitsHead r15
 
+s db Setting 0
 start:
 yield
+l tmp gasDial Setting
+get tmp db tmp
+s db Setting tmp
+
 move sp suitsHead
 suitPressureLoop:
-beq sp gasesHead suitLoopFinish # finished gas types
-pop tank
-pop pump
+beq sp gasesHead start # gasesPressureLoop # finished gas types
 pop ana
+pop pump
+pop tank
 ld tankPressure tank Pressure
 div tmp 73500 tankPressure # 30 mols * 295 C * 8 / pressure
 sd pump Setting tmp
@@ -30,7 +38,24 @@ select tmp tmp maxCanPressure minCanPressure
 ld gasPressure ana Pressure # pressure check canister pressure
 slt tmp gasPressure tmp # tmp = 1 if schmitt needs
 and tmp tmp tankPressure # < min pressure and tank > min pressure
-#sd pump On tmp # switch pump if needed
+sd pump On tmp # switch pump if needed
 j suitPressureLoop
-suitLoopFinish:
-j start
+gasesPressureLoop:
+beqz sp start
+
+pop pump
+pop tank
+ld gasPressure tank Pressure
+sgt gasPressure gasPressure minTankPressure
+
+ld tmp pump On
+select tmp tmp maxCanPressure minCanPressure
+ld gasPressure canAna Pressure # pressure check canister pressure
+slt tmp gasPressure tmp # tmp = 1 if schmitt needs
+sgt tankPressure tankPressure minTankPressure # above min tank pres
+and tmp tmp tankPressure
+
+and tmp tmp gasPressure # gas? + >min presure
+sd pump On tmp # switch reg if needed
+
+j gasesPressureLoop

@@ -1,21 +1,17 @@
 define tankHash HASH("StructureTankSmall")
-define pumpHash HASH("StructureTurboVolumePump")
 define valveHash HASH("StructureDigitalValve")
-define anaHash HASH("StructurePipeAnalysizer")
+define stackHead 10
 
-alias gasPressure r0
-alias gasTemp r1
-alias sleepCount r2
-alias tank r3
-alias valve r4
-alias pump r5
-alias ana r6
-alias tankPressure r7
-alias fuelTank r8
-alias oxyTank r9
-alias volTank r10
-alias tmp r14
-alias stackHead r15
+alias tankPressure r0
+alias gasPressure r1
+alias gasTemp r2
+alias sleepCount r3
+alias tank r4
+alias valve r5
+alias fuelTank r6
+alias oxyTank r7
+alias volTank r8
+alias tmp r15
 
 s db Setting 0
 clr db
@@ -23,44 +19,23 @@ lbn tank tankHash HASH("co2 Tank") ReferenceId Maximum
 push tank
 lbn valve valveHash HASH("co2 Valve") ReferenceId Maximum
 push valve
-lbn pump pumpHash HASH("co2 Pump") ReferenceId Maximum
-push pump
-lbn ana anaHash HASH("co2 Analyser") ReferenceId Maximum
-push ana
 lbn tank tankHash HASH("n2 Tank") ReferenceId Maximum
 push tank
 lbn valve valveHash HASH("n2 Valve") ReferenceId Maximum
 push valve
-lbn pump pumpHash HASH("n2 Pump") ReferenceId Maximum
-push pump
-lbn ana anaHash HASH("n2 Analyser") ReferenceId Maximum
-push ana
 lbn tank tankHash HASH("Vol Tank") ReferenceId Maximum
 move volTank tank
 push tank
 lbn valve valveHash HASH("Vol Valve") ReferenceId Maximum
 push valve
-lbn pump pumpHash HASH("Vol Pump") ReferenceId Maximum
-push pump
-lbn ana anaHash HASH("Vol Analyser") ReferenceId Maximum
-push ana
 lbn tank tankHash HASH("o2 Tank") ReferenceId Maximum
 move oxyTank tank
 push tank
 lbn valve valveHash HASH("o2 Valve") ReferenceId Maximum
 push valve
-lbn pump pumpHash HASH("o2 Pump") ReferenceId Maximum
-push pump
-lbn ana anaHash HASH("o2 Analyser") ReferenceId Maximum
-push ana
 lbn tank tankHash HASH("Fuel Tank") ReferenceId Maximum
 move fuelTank tank
 push tank
 lbn valve valveHash HASH("Fuel Valve") ReferenceId Maximum
 push valve
-lbn pump pumpHash HASH("Fuel Pump") ReferenceId Maximum
-push pump
-lbn ana anaHash HASH("Fuel Analyser") ReferenceId Maximum
-push ana
-move stackHead sp
 s db Setting 1
