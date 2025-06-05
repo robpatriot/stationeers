@@ -8,9 +8,9 @@ alias pump r2
 alias ana r3
 alias activePump r4
 alias dialVal r5
-alias feedAna r6
-alias tmp r14
-alias tmp2 r15
+alias currGas r6
+alias feedAna r7
+alias tmp r15
 
 s db Setting 0
 clr db
