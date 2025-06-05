@@ -2,42 +2,50 @@ define tankHash HASH("StructureTankSmall")
 define pumpHash HASH("StructureTurboVolumePump")
 define anaHash HASH("StructurePipeAnalysizer")
 
-alias gasDial d0
 alias gasPressure r0
-alias tankPressure r1
-alias tank r2
-alias pump r3
-alias ana r4
-alias tmp r13
-alias gasesHead r14
-alias suitsHead r15
+alias tank r1
+alias pump r2
+alias ana r3
+alias activePump r4
+alias dialVal r5
+alias feedAna r6
+alias tmp r14
+alias tmp2 r15
 
 s db Setting 0
 clr db
-push 
-lbn tank tankHash HASH("co2 Tank") ReferenceId Maximum
-push tank
-lbn pump pumpHash HASH("co2 Pump") ReferenceId Maximum
+push GasType.Oxygen
+push GasType.Volatiles
+push GasType.Fuel
+push GasType.Nitrogen
+push GasType.CarbonDioxide
+lbn pump pumpHash HASH("o2 Pump") ReferenceId Maximum
 push pump
-lbn tank tankHash HASH("Vol Tank") ReferenceId Maximum
-push tank
 lbn pump pumpHash HASH("Vol Pump") ReferenceId Maximum
 push pump
-lbn tank tankHash HASH("Fuel Tank") ReferenceId Maximum
-push tank
 lbn pump pumpHash HASH("Fuel Pump") ReferenceId Maximum
 push pump
+lbn pump pumpHash HASH("n2 Pump") ReferenceId Maximum
+push pump
+lbn pump pumpHash HASH("co2 Pump") ReferenceId Maximum
+push pump
+lbn tank tankHash HASH("o2 Tank") ReferenceId Maximum
+move tmp2 tank # store o2 tank for later
+push tank
+lbn tank tankHash HASH("Vol Tank") ReferenceId Maximum
+push tank
+lbn tank tankHash HASH("Fuel Tank") ReferenceId Maximum
+push tank
 lbn tank tankHash HASH("n2 Tank") ReferenceId Maximum
 move tmp tank # store n2 tank for later
 push tank
-lbn pump pumpHash HASH("n2 Pump") ReferenceId Maximum
-push pump
-lbn tank tankHash HASH("o2 Tank") ReferenceId Maximum
+lbn tank tankHash HASH("co2 Tank") ReferenceId Maximum
 push tank
-lbn pump pumpHash HASH("o2 Pump") ReferenceId Maximum
+lbn pump pumpHash HASH("Waste Pump") ReferenceId Maximum
 push pump
-move gasesHead sp
-push tank
+lbn ana anaHash HASH("Feed Analyser") ReferenceId Maximum
+push ana
+push tmp2 # push o2 tank
 lbn pump pumpHash HASH("Suit o2 Pump") ReferenceId Maximum
 push pump
 lbn ana anaHash HASH("Suit o2 Analyser") ReferenceId Maximum
@@ -47,5 +55,4 @@ lbn pump pumpHash HASH("Suit n2 Pump") ReferenceId Maximum
 push pump
 lbn ana anaHash HASH("Suit n2 Analyser") ReferenceId Maximum
 push ana
-move suitsHead sp
 s db Setting 1

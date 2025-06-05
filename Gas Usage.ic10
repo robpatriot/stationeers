@@ -1,61 +1,107 @@
-define minCanPressure 18050
-define maxCanPressure 18500
+define minCanPressure 18000
 define minTankPressure 2000
+define suitsHead 23
+define storesHead 17
 
-alias canAna d0
-alias gasDial d1
-alias gasCons d2
-alias gasButton d3
+alias gasDial d0
+alias gasCons d1
+alias gasBut d2
+alias canStore d3
 
 alias gasPressure r0
-alias tankPressure r1
-alias tank r2
-alias pump r3
-alias ana r4
-alias tmp r13
-alias gasesHead r14
-alias suitsHead r15
+alias tank r1
+alias pump r2
+alias ana r3
+alias activePump r4
+alias dialVal r5
+alias currGas r6
+alias feedAna r7
+alias tmp r14
+alias tmp2 r15
 
-s db Setting 0
+# test pump direction
+alias wastePump r13
+lbn wastePump pumpHash HASH("Waste Pump") ReferenceId Maximum
+sd wastePump Mode 1
+s db On 0
+
 start:
 yield
-l tmp gasDial Setting
-get tmp db tmp
+l dialVal gasDial Setting
+get tmp db dialVal
 s db Setting tmp
-
 move sp suitsHead
 suitPressureLoop:
-beq sp gasesHead start # gasesPressureLoop # finished gas types
+beq sp storesHead gasStores # finished gas types
 pop ana
 pop pump
 pop tank
-ld tankPressure tank Pressure
-div tmp 73500 tankPressure # 30 mols * 295 C * 8 / pressure
-sd pump Setting tmp
-sgt tankPressure tankPressure minTankPressure # above min tank pres
-ld tmp pump On
-select tmp tmp maxCanPressure minCanPressure
-ld gasPressure ana Pressure # pressure check canister pressure
-slt tmp gasPressure tmp # tmp = 1 if schmitt needs
-and tmp tmp tankPressure # < min pressure and tank > min pressure
-sd pump On tmp # switch pump if needed
+jal fillCan
 j suitPressureLoop
-gasesPressureLoop:
-beqz sp start
-
-pop pump
-pop tank
+gasStores:
+pop ana # get feed ana
+l tmp ana Pressure
+bnez tmp checkGas # gas -> checkGas
+sd activePump On 0 # no gas -> turn off pump
+ls tmp canStore 0 Occupied # can in store
+l tmp2 gasBut Open # button pressed?
+and tmp tmp tmp2 # can and button
+beqz tmp start # no can or no button -> nothing
+pumpFill:
+add tmp dialVal 10
+get tank db tmp
+add tmp dialVal 5
+get activePump db tmp
+sd activePump Mode YY
+move pump activePump
+jal fillCan
+j start
+checkGas:
+move currGas -1
+l tmp canStore RatioOxygen
+brlt tmp 1 2
+s currGas 0
+l tmp2 canStore RatioVolatiles
+brlt tmp2 1 2
+s currGas 1
+sgt tmp tmp 0.3
+sgt tmp2 tmp2 0.6
+and tmp tmp tmp2
+breqz tmp 2
+s currGas 2
+l tmp canStore RatioNitrogen
+brlt tmp 1 2
+s currGas 3
+l tmp canStore RatioCarbonDioxide
+brlt tmp 1 2
+s currGas 4
+bne currGas -1 pure # have pure gas
+pop activePump # Waste pump
+j clear
+pure:
+ls tmp canStore 0 Occupied # can in store?
+beqz tmp pumpClear # no can -> clear
+checkButton:
+l tmp gasBut Open
+beqz tmp start # no butt -> nothing
+beq currGas dialVal pumpFill
+pumpClear:
+add tmp currGas 5
+get activePump db tmp # get pump for selected gas
+clear:
+sd activePump Mode XX # pump out
+sd activePump On 1
+j start
+fillCan:
 ld gasPressure tank Pressure
-sgt gasPressure gasPressure minTankPressure
+sgt tmp gasPressure minTankPressure # above min tank pres
+beqz tmp setPump
+div tmp 73500 gasPressure # 30 mols * 295 C * 8 / pressure
+sd pump Setting tmp
+ld gasPressure ana Pressure # pressure check canister pressure
+slt tmp gasPressure minCanPressure # < min pres?
+setPump:
+sd pump On tmp # switch pump
+j ra
 
-ld tmp pump On
-select tmp tmp maxCanPressure minCanPressure
-ld gasPressure canAna Pressure # pressure check canister pressure
-slt tmp gasPressure tmp # tmp = 1 if schmitt needs
-sgt tankPressure tankPressure minTankPressure # above min tank pres
-and tmp tmp tankPressure
-
-and tmp tmp gasPressure # gas? + >min presure
-sd pump On tmp # switch reg if needed
-
-j gasesPressureLoop
+end:
