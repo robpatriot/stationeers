@@ -1,16 +1,14 @@
 define tankHash HASH("StructureTankSmall")
 define valveHash HASH("StructureDigitalValve")
-define stackHead 10
 
-alias tankPressure r0
-alias gasPressure r1
-alias gasTemp r2
-alias sleepCount r3
-alias tank r4
-alias valve r5
-alias fuelTank r6
-alias oxyTank r7
-alias volTank r8
+alias gasPressure r0
+alias gasTemp r1
+alias tank r2
+alias valve r3
+alias fuelTank r4
+alias oxyTank r5
+alias volTank r6
+alias sleepCount r7
 alias tmp r15
 
 s db Setting 0

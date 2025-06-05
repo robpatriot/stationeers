@@ -1,6 +1,5 @@
 define sleepTicks 5
-define minCanPressure 18050
-define maxCanPressure 18500
+define stackHead 10
 define maxTemp 297
 define minTankPressure 2000
 define maxTankPressure 50000
@@ -13,17 +12,15 @@ alias coolAna d2 # cooling analyser
 alias coolPump d3 # cooling void pump
 alias mixer d4 # fuel mixer
 
-alias tankPressure r0
-alias gasPressure r1
-alias gasTemp r2
-alias sleepCount r3
-alias tank r4
-alias valve r5
-alias fuelTank r6
-alias oxyTank r7
-alias volTank r8
-alias tmp r14
-alias stackHead r15
+alias gasPressure r0
+alias gasTemp r1
+alias tank r2
+alias valve r3
+alias fuelTank r4
+alias oxyTank r5
+alias volTank r6
+alias sleepCount r7
+alias tmp r15
 move sleepCount sleepTicks
 
 start:
@@ -75,7 +72,7 @@ pressureTestLoop:
 beqz sp start # finished gas types
 pop valve
 pop tank
-ld tankPressure tank Pressure
-sgt tmp tankPressure maxTankPressure
+ld tmp tank Pressure
+sgt tmp tmp maxTankPressure
 sd valve On tmp
 j pressureTestLoop
