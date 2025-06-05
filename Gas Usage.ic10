@@ -16,8 +16,7 @@ alias activePump r4
 alias dialVal r5
 alias currGas r6
 alias feedAna r7
-alias tmp r14
-alias tmp2 r15
+alias tmp r15
 
 # test pump direction
 alias wastePump r13
@@ -40,12 +39,12 @@ jal fillCan
 j suitPressureLoop
 gasStores:
 pop ana # get feed ana
-l tmp ana Pressure
-bnez tmp checkGas # gas -> checkGas
+l gasPressure ana Pressure
+bnez gasPressure checkGas # gas -> checkGas
 sd activePump On 0 # no gas -> turn off pump
 ls tmp canStore 0 Occupied # can in store
-l tmp2 gasBut Open # button pressed?
-and tmp tmp tmp2 # can and button
+l gasPressure gasBut Open # button pressed? (borrow var)
+and tmp tmp gasPressure # can and button
 beqz tmp start # no can or no button -> nothing
 pumpFill:
 add tmp dialVal 10
@@ -103,5 +102,3 @@ slt tmp gasPressure minCanPressure # < min pres?
 setPump:
 sd pump On tmp # switch pump
 j ra
-
-end:
