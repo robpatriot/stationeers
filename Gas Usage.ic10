@@ -1,4 +1,4 @@
-define minCanPressure 18000
+define minCanPressure 18500
 define minTankPressure 2000
 define suitsHead 23
 define storesHead 17
@@ -15,15 +15,10 @@ alias ana r3
 alias activePump r4
 alias dialVal r5
 alias currGas r6
-alias feedAna r7
-alias tmp r15
+alias tmp r14
+alias tmp2 r15
 
-# test pump direction
-alias wastePump r13
-lbn wastePump pumpHash HASH("Waste Pump") ReferenceId Maximum
-sd wastePump Mode 1
-s db On 0
-
+s db Setting -1
 start:
 yield
 l dialVal gasDial Setting
@@ -39,56 +34,64 @@ jal fillCan
 j suitPressureLoop
 gasStores:
 pop ana # get feed ana
-l gasPressure ana Pressure
+ld gasPressure ana Pressure
 bnez gasPressure checkGas # gas -> checkGas
+ld tmp activePump On # pump?
+l tmp2 gasBut Open # button?
+or tmp tmp tmp2 # pump or button
 sd activePump On 0 # no gas -> turn off pump
-ls tmp canStore 0 Occupied # can in store
-l gasPressure gasBut Open # button pressed? (borrow var)
-and tmp tmp gasPressure # can and button
+s gasBut Open 0 # reset button
+ls tmp2 canStore 0 Occupied # can in store
+and tmp tmp tmp2 # can and (pump or button)
 beqz tmp start # no can or no button -> nothing
 pumpFill:
 add tmp dialVal 10
 get tank db tmp
 add tmp dialVal 5
 get activePump db tmp
-sd activePump Mode YY
+sd activePump Mode 1
 move pump activePump
 jal fillCan
 j start
 checkGas:
 move currGas -1
-l tmp canStore RatioOxygen
+ld tmp ana RatioOxygen
 brlt tmp 1 2
-s currGas 0
-l tmp2 canStore RatioVolatiles
+move currGas 0
+ld tmp2 ana RatioVolatiles
 brlt tmp2 1 2
-s currGas 1
+move currGas 1
 sgt tmp tmp 0.3
 sgt tmp2 tmp2 0.6
 and tmp tmp tmp2
 breqz tmp 2
-s currGas 2
-l tmp canStore RatioNitrogen
+move currGas 2
+ld tmp ana RatioNitrogen
 brlt tmp 1 2
-s currGas 3
-l tmp canStore RatioCarbonDioxide
+move currGas 3
+ld tmp ana RatioCarbonDioxide
 brlt tmp 1 2
-s currGas 4
+move currGas 4
 bne currGas -1 pure # have pure gas
 pop activePump # Waste pump
 j clear
 pure:
+pop pump
+sd pump On 0
 ls tmp canStore 0 Occupied # can in store?
 beqz tmp pumpClear # no can -> clear
-checkButton:
 l tmp gasBut Open
-beqz tmp start # no butt -> nothing
+ld tmp2 activePump On
+or tmp tmp tmp2
+beqz tmp start # no butt, no active pump -> nothing
+s gasBut Open 0 # reset button
 beq currGas dialVal pumpFill
 pumpClear:
 add tmp currGas 5
 get activePump db tmp # get pump for selected gas
 clear:
-sd activePump Mode XX # pump out
+sd activePump Mode 0 # pump out
+sd activePump Setting 100
 sd activePump On 1
 j start
 fillCan:

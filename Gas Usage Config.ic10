@@ -9,8 +9,8 @@ alias ana r3
 alias activePump r4
 alias dialVal r5
 alias currGas r6
-alias feedAna r7
-alias tmp r15
+alias tmp r14
+alias tmp2 r15
 
 s db Setting 0
 clr db
@@ -43,6 +43,7 @@ lbn tank tankHash HASH("co2 Tank") ReferenceId Maximum
 push tank
 lbn pump pumpHash HASH("Waste Pump") ReferenceId Maximum
 push pump
+move activePump pump
 lbn ana anaHash HASH("Feed Analyser") ReferenceId Maximum
 push ana
 push tmp2 # push o2 tank
