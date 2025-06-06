@@ -58,14 +58,12 @@ move currGas 3
 ld tmp ana RatioCarbonDioxide
 brlt tmp 1 2
 move currGas 4
-bne currGas -1 pure # have pure gas
 pop activePump # Waste pump
-j clear
-pure:
-pop pump
-sd pump On 0 # turn off waste pump
-ls tmp canStore 0 Occupied # can in store?
-beqz tmp buttPumpClear # pure, no can -> clear
+seq tmp currGas -1
+sd activePump On tmp
+bnez tmp start # push to waste -> start
+ls tmp canStore 0 Occupied # can?
+beqz tmp butPumpClear # pure, no can -> clear
 l tmp gasBut Open
 beqz tmp start # can, no butt -> nothing
 bne currGas dialVal pumpClear
@@ -90,7 +88,7 @@ slt tmp gasPressure minCanPressure # < min pres?
 setPump:
 sd pump On tmp # switch pump
 j ra
-buttPumpClear:
+butPumpClear:
 s gasBut Open 0
 pumpClear:
 add tmp currGas 5
