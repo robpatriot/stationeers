@@ -1,4 +1,3 @@
-1. Currently can't distinguish between clear and then fill check (active pump) and clear because of mixed gas (that becomes single gas before empty and so fills after emptying)
 2. Confirm occupancy controls as much as possible
 3. Remove old outside box
 4. Move pump

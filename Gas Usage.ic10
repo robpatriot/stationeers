@@ -65,10 +65,10 @@ pure:
 pop pump
 sd pump On 0 # turn off waste pump
 ls tmp canStore 0 Occupied # can in store?
-beqz tmp pumpClear # pure, no can -> clear
+beqz tmp buttPumpClear # pure, no can -> clear
 l tmp gasBut Open
 beqz tmp start # can, no butt -> nothing
-bneq currGas dialVal pumpClear
+bne currGas dialVal pumpClear
 pumpFill:
 add tmp dialVal 10
 get tank db tmp
@@ -90,6 +90,8 @@ slt tmp gasPressure minCanPressure # < min pres?
 setPump:
 sd pump On tmp # switch pump
 j ra
+buttPumpClear:
+s gasBut Open 0
 pumpClear:
 add tmp currGas 5
 get activePump db tmp # get pump for selected gas
