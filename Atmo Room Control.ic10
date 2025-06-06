@@ -1,4 +1,5 @@
 define lightHash HASH("StructureWallLight")
+define screenHash HASH("StructureConsole")
 define crusherHash HASH("StructureIceCrusher")
 
 define minAirPressure 103
@@ -28,7 +29,7 @@ l occupied sensor Activate # anyone here?
 beq occupied prevOcc afterOccup # check if already know
 move prevOcc occupied
 sb lightHash On occupied # switch lights
-s screen On occupied # switch screen
+sb screenHash On occupied # switch screen
 
 afterOccup:
 l crusherTemp dial Setting
