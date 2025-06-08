@@ -1,16 +1,17 @@
-define minCanPressure 18500
-define minTankPressure 2000
+define minCPress 8500 # normal can
+define minSCPress 18500 # smart can
+define minTPress 2000 # tank
 define suitsHead 23
 define storesHead 17
 alias gasDial d0
 alias gasCons d1
 alias gasBut d2
 alias canStore d3
-alias gasPressure r0
+alias gasPress r0
 alias tank r1
 alias pump r2
 alias ana r3
-alias activePump r4
+alias currPump r4
 alias dialVal r5
 alias currGas r6
 alias tmp r14
@@ -27,13 +28,14 @@ beq sp storesHead gasStores # finished gas types
 pop ana
 pop pump
 pop tank
+move tmp HASH("ItemGasCanisterSmart")
 jal fillCan
 j suitsLoop
 gasStores:
 pop ana # get feed ana
-ld gasPressure ana Pressure
-bnez gasPressure checkGas # gas -> checkGas
-sd activePump On 0 # no gas -> turn off pump
+ld gasPress ana Pressure
+bnez gasPress checkGas # gas -> checkGas
+sd currPump On 0 # no gas -> turn off pump
 ls tmp canStore 0 Occupied # can?
 l tmp2 gasBut Open # button?
 and tmp tmp tmp2 # can? and button?
@@ -58,9 +60,11 @@ move currGas 3
 ld tmp ana RatioCarbonDioxide
 brlt tmp 1 2
 move currGas 4
-pop activePump # Waste pump
-seq tmp currGas -1
-sd activePump On tmp
+pop currPump # Waste pump
+ld tmp currPump On # can get 1 tick pure then mixed
+seq tmp2 currGas -1 # -> latch to on if push to waste
+or tmp tmp tmp2
+sd currPump On tmp
 bnez tmp start # push to waste -> start
 ls tmp canStore 0 Occupied # can?
 beqz tmp butPumpClear # pure, no can -> clear
@@ -71,30 +75,36 @@ pumpFill:
 add tmp dialVal 10
 get tank db tmp
 add tmp dialVal 5
-get activePump db tmp
-sd activePump Mode 1
-move pump activePump
+get currPump db tmp
+move pump currPump
+ls tmp canStore 0 PrefabHash
 jal fillCan
 s gasBut Open tmp # reset button if fill finished
 j start
 fillCan:
-ld gasPressure tank Pressure
-sgt tmp gasPressure minTankPressure # above min tank pres
-beqz tmp setPump # branch so no / 0
-div tmp 73500 gasPressure # 30 mols * 295 C * 8 / pressure
+seq tmp tmp HASH("ItemGasCanisterSmart")
+select tmp tmp minSCPress minCPress
+ld gasPress ana Pressure
+sub tmp tmp gasPress # missing press
+ld tmp2 tank Pressure
+div tmp tmp tmp2 # target press ratio
+mul tmp tmp 204 # press ratio / target vol
+#ld tmp2 tank Temperature
+#mul tmp tmp tmp2
+#ld tmp2 ana Temperature
+#div tmp tmp tmp2
+sd pump Mode 1
 sd pump Setting tmp
-ld gasPressure ana Pressure # pressure check canister pressure
-slt tmp gasPressure minCanPressure # < min pres?
-setPump:
-sd pump On tmp # switch pump
+sgt tmp tmp 0 # press reqd?
+sd pump On tmp # switch pump (tmp used on return)
 j ra
 butPumpClear:
 s gasBut Open 0
 pumpClear:
 add tmp currGas 5
-get activePump db tmp # get pump for selected gas
+get currPump db tmp # get pump for selected gas
 clear:
-sd activePump Mode 0 # pump out
-sd activePump Setting 100
-sd activePump On 1
+sd currPump Mode 0 # pump out
+sd currPump Setting 100
+sd currPump On 1
 j start
